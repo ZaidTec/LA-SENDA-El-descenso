@@ -58,7 +58,11 @@ class _Instruction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color(0xFF1B2925),
+      color: const Color(0xFF24211C),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(3),
+        side: const BorderSide(color: Color(0xFF59442E)),
+      ),
       margin: const EdgeInsets.only(bottom: 14),
       child: Padding(
         padding: const EdgeInsets.all(18),

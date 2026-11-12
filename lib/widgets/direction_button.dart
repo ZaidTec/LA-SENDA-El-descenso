@@ -54,11 +54,14 @@ class _DirectionButtonState extends State<DirectionButton> {
           width: 54,
           height: 50,
           decoration: BoxDecoration(
-            color: const Color(0xFF29483A),
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(color: const Color(0xFF63846D)),
+            color: const Color(0xFF49321F),
+            borderRadius: BorderRadius.circular(3),
+            border: Border.all(color: const Color(0xFFB77C3D), width: 1.5),
+            boxShadow: const [
+              BoxShadow(color: Colors.black45, offset: Offset(2, 2)),
+            ],
           ),
-          child: Icon(widget.icon, size: 28, color: const Color(0xFFF4EBD0)),
+          child: Icon(widget.icon, size: 28, color: const Color(0xFFF0D7A0)),
         ),
       ),
     );

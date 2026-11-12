@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 
 import '../models/maze_level.dart';
 import 'game_screen.dart';
+import 'camp_screen.dart';
+import 'shop_screen.dart';
 
 class ResultScreen extends StatelessWidget {
   const ResultScreen({
     required this.level,
     required this.won,
     required this.elapsedSeconds,
+    required this.rewardCoins,
+    this.controlMode = 'dpad',
+    this.equippedItem = 'explorer',
     this.lostReason = '',
     this.saveError,
     super.key,
@@ -16,14 +21,14 @@ class ResultScreen extends StatelessWidget {
   final MazeLevel level;
   final bool won;
   final int elapsedSeconds;
+  final int rewardCoins;
+  final String controlMode;
+  final String equippedItem;
   final String lostReason;
   final String? saveError;
 
   @override
   Widget build(BuildContext context) {
-    final nextLevel = level.number < mazeLevels.length
-        ? mazeLevels[level.number]
-        : null;
     final time = Duration(seconds: elapsedSeconds);
     final formattedTime =
         '${time.inMinutes.toString().padLeft(2, '0')}:'
@@ -53,7 +58,7 @@ class ResultScreen extends StatelessWidget {
                   const SizedBox(height: 18),
                   Text(
                     won
-                        ? '¡Laberinto superado!'
+                        ? '¡Expedición completada!'
                         : lostReason.contains('atrap')
                         ? '¡Te atraparon!'
                         : 'Se acabó el tiempo',
@@ -64,7 +69,7 @@ class ResultScreen extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text(
                     won
-                        ? 'Completaste ${level.name}.'
+                        ? 'Completaste ${level.name}. La senda queda abierta.'
                         : lostReason.contains('atrap')
                         ? 'Esquiva o elimina a los enemigos y vuelve a intentarlo.'
                         : 'Inténtalo de nuevo y busca la llave.',
@@ -73,7 +78,11 @@ class ResultScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   Card(
-                    color: const Color(0xFF1B2925),
+                    color: const Color(0xFF24211C),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(3),
+                      side: const BorderSide(color: Color(0xFF59442E)),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(20),
                       child: Column(
@@ -96,6 +105,42 @@ class ResultScreen extends StatelessWidget {
                               fontFeatures: [FontFeature.tabularFigures()],
                             ),
                           ),
+                          if (won) ...[
+                            const SizedBox(height: 12),
+                            Card(
+                              color: const Color(0xFF3B2A1D),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(3),
+                                side: const BorderSide(
+                                  color: Color(0xFFB77C3D),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.toll,
+                                      color: Color(0xFFE9BD60),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      saveError != null
+                                          ? 'No se pudo guardar la recompensa'
+                                          : rewardCoins > 0
+                                          ? 'Recompensa: +$rewardCoins monedas'
+                                          : 'Recompensa ya reclamada',
+                                      style: const TextStyle(
+                                        color: Color(0xFFE9BD60),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -103,49 +148,49 @@ class ResultScreen extends StatelessWidget {
                   if (saveError != null) ...[
                     const SizedBox(height: 12),
                     Text(
-                      'No se pudo guardar el récord: $saveError',
+                      'No se pudo guardar el progreso: $saveError',
                       textAlign: TextAlign.center,
                       style: const TextStyle(color: Color(0xFFFFA99D)),
                     ),
                   ],
                   const SizedBox(height: 24),
-                  if (won && nextLevel != null)
-                    FilledButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute<void>(
-                            builder: (_) => GameScreen(level: nextLevel),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.arrow_forward),
-                      label: Text('Jugar nivel ${nextLevel.number}'),
-                    ),
                   if (!won)
                     FilledButton.icon(
                       onPressed: () {
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute<void>(
-                            builder: (_) => GameScreen(level: level),
+                            builder: (_) => GameScreen(
+                              level: level,
+                              controlMode: controlMode,
+                              equippedItem: equippedItem,
+                            ),
                           ),
                         );
                       },
                       icon: const Icon(Icons.refresh),
                       label: const Text('Reintentar'),
                     ),
-                  if (won && nextLevel == null)
-                    Text(
-                      '¡Completaste los ${mazeLevels.length} niveles!',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Color(0xFFE9BD60)),
+                  FilledButton.icon(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ShopScreen(),
+                      ),
                     ),
+                    icon: const Icon(Icons.storefront_outlined),
+                    label: Text(
+                      won ? 'CANJEAR EN EL PUESTO' : 'VISITAR EL PUESTO',
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).popUntil((route) => route.isFirst);
-                    },
+                    onPressed: () => Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const CampScreen(),
+                      ),
+                      (_) => false,
+                    ),
                     icon: const Icon(Icons.home_outlined),
-                    label: const Text('Volver al menú'),
+                    label: const Text('VOLVER AL CAMPAMENTO'),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size.fromHeight(52),
                     ),

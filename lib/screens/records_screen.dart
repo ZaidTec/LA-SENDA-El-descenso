@@ -39,11 +39,15 @@ class RecordsScreen extends StatelessWidget {
               const SizedBox(height: 16),
               for (final level in mazeLevels)
                 Card(
-                  color: const Color(0xFF1B2925),
+                  color: const Color(0xFF24211C),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(3),
+                    side: const BorderSide(color: Color(0xFF59442E)),
+                  ),
                   child: ListTile(
                     leading: const Icon(
                       Icons.emoji_events_outlined,
-                      color: Color(0xFFE9BD60),
+                      color: Color(0xFFFFB94A),
                     ),
                     title: Text('Nivel ${level.number}: ${level.name}'),
                     trailing: Text(

@@ -31,18 +31,31 @@ class LevelsScreen extends StatelessWidget {
               final unlocked = level.number <= progress.unlockedLevel;
               final bestTime = progress.bestTimes[level.number];
               return Card(
-                color: const Color(0xFF1B2925),
+                color: const Color(0xFF24211C),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(3),
+                  side: const BorderSide(color: Color(0xFF59442E)),
+                ),
                 clipBehavior: Clip.antiAlias,
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(16),
-                  leading: CircleAvatar(
-                    backgroundColor: unlocked
-                        ? const Color(0xFF315C45)
-                        : const Color(0xFF303A35),
+                  leading: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: unlocked
+                          ? const Color(0xFF533A24)
+                          : const Color(0xFF292725),
+                      border: Border.all(
+                        color: unlocked
+                            ? const Color(0xFFB77C3D)
+                            : const Color(0xFF51483D),
+                      ),
+                    ),
                     child: Icon(
                       unlocked ? Icons.explore : Icons.lock_outline,
                       color: unlocked
-                          ? const Color(0xFFE9BD60)
+                          ? const Color(0xFFFFB94A)
                           : Colors.white54,
                     ),
                   ),
@@ -63,7 +76,11 @@ class LevelsScreen extends StatelessWidget {
                       ? () {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
-                              builder: (_) => GameScreen(level: level),
+                              builder: (_) => GameScreen(
+                                level: level,
+                                controlMode: progress.controlMode,
+                                equippedItem: progress.equippedItem,
+                              ),
                             ),
                           );
                         }

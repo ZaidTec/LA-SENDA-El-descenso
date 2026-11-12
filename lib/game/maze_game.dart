@@ -52,9 +52,12 @@ class _Projectile {
 }
 
 class MazeGame extends FlameGame {
-  MazeGame({required this.level, required this.onChanged})
-    : _map = level.rows.map((row) => row.split('')).toList(),
-      _random = math.Random(level.number * 97) {
+  MazeGame({
+    required this.level,
+    required this.onChanged,
+    this.equippedItem = 'explorer',
+  }) : _map = level.rows.map((row) => row.split('')).toList(),
+       _random = math.Random(level.number * 97) {
     for (var row = 0; row < _map.length; row++) {
       for (var column = 0; column < _map[row].length; column++) {
         switch (_map[row][column]) {
@@ -83,6 +86,7 @@ class MazeGame extends FlameGame {
 
   final MazeLevel level;
   final void Function(MazeGameSnapshot snapshot) onChanged;
+  final String equippedItem;
   final List<List<String>> _map;
   final List<_Enemy> _enemies = [];
   final List<_Projectile> _projectiles = [];
@@ -369,19 +373,20 @@ class MazeGame extends FlameGame {
 
     final tileWidth = renderSize.x / _map.first.length;
     final tileHeight = renderSize.y / _map.length;
-    final floorPaintA = Paint()..color = const Color(0xFF28372E);
-    final floorPaintB = Paint()..color = const Color(0xFF303D32);
-    final stonePaint = Paint()..color = const Color(0xFF465044);
+    final floorPaintA = Paint()..color = const Color(0xFF38342C);
+    final floorPaintB = Paint()..color = const Color(0xFF302E29);
+    final stonePaint = Paint()..color = const Color(0xFF65533A);
     final wallPaint = Paint()
       ..shader = Gradient.linear(
         Offset.zero,
         Offset(tileWidth, tileHeight),
-        const [Color(0xFF687562), Color(0xFF354339), Color(0xFF202B26)],
+        const [Color(0xFF675C48), Color(0xFF393A35), Color(0xFF202426)],
         const [0, .52, 1],
       );
-    final wallTopPaint = Paint()..color = const Color(0xFF87917A);
-    final wallShadePaint = Paint()..color = const Color(0xFF1A2520);
-    final floorSeamPaint = Paint()..color = const Color(0x163D4E41);
+    final wallTopPaint = Paint()..color = const Color(0xFF817052);
+    final wallShadePaint = Paint()..color = const Color(0xFF171A1B);
+    final wallEdgePaint = Paint()..color = const Color(0xFF4A4437);
+    final floorSeamPaint = Paint()..color = const Color(0x303C3327);
     final ambientGlow = Paint()
       ..shader = Gradient.radial(
         Offset(
@@ -389,7 +394,7 @@ class MazeGame extends FlameGame {
           (_visualPlayerRow + .5) * tileHeight,
         ),
         math.max(renderSize.x, renderSize.y) * .68,
-        const [Color(0x465A744D), Color(0x00151C17)],
+        const [Color(0x48C47A35), Color(0x00110F0D)],
       );
 
     for (var row = 0; row < _map.length; row++) {
@@ -420,6 +425,35 @@ class MazeGame extends FlameGame {
             ),
             wallShadePaint,
           );
+          if ((row * 3 + column * 5).isEven) {
+            canvas.drawRect(
+              Rect.fromLTWH(
+                rect.left + tileWidth * .12,
+                rect.top + tileHeight * .42,
+                tileWidth * .3,
+                tileHeight * .035,
+              ),
+              wallEdgePaint,
+            );
+            canvas.drawRect(
+              Rect.fromLTWH(
+                rect.left + tileWidth * .47,
+                rect.top + tileHeight * .42,
+                tileWidth * .045,
+                tileHeight * .19,
+              ),
+              wallEdgePaint,
+            );
+            canvas.drawRect(
+              Rect.fromLTWH(
+                rect.left + tileWidth * .23,
+                rect.top + tileHeight * .78,
+                tileWidth * .16,
+                tileHeight * .045,
+              ),
+              wallTopPaint,
+            );
+          }
         } else {
           canvas.drawRect(
             rect,
@@ -485,18 +519,16 @@ class MazeGame extends FlameGame {
         projectile.column * tileWidth,
         projectile.row * tileHeight,
       );
-      canvas.drawCircle(
-        center,
-        math.min(tileWidth, tileHeight) * .27,
-        Paint()
-          ..color = const Color(0xFFE99C4D)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
-      );
-      canvas.drawCircle(
-        center,
-        math.min(tileWidth, tileHeight) * .13,
-        Paint()..color = const Color(0xFFFFF1B5),
-      );
+      final pixel = math.min(tileWidth, tileHeight) * .22;
+      canvas
+        ..drawRect(
+          Rect.fromCenter(center: center, width: pixel * 2, height: pixel * 2),
+          Paint()..color = const Color(0xFFE27632),
+        )
+        ..drawRect(
+          Rect.fromCenter(center: center, width: pixel, height: pixel),
+          Paint()..color = const Color(0xFFFFE59A),
+        );
     }
     _drawPlayer(
       canvas,
@@ -504,6 +536,7 @@ class MazeGame extends FlameGame {
       _visualPlayerRow * tileHeight,
       tileWidth,
       tileHeight,
+      equippedItem,
     );
   }
 
@@ -512,8 +545,8 @@ class MazeGame extends FlameGame {
     final shadow = Paint()..color = const Color(0xFF702E39);
     final eye = Paint()..color = const Color(0xFFFFE7B5);
     final pupil = Paint()..color = const Color(0xFF2A171B);
-    canvas.drawOval(
-      Rect.fromLTWH(x + w * .17, y + h * .78, w * .66, h * .14),
+    canvas.drawRect(
+      Rect.fromLTWH(x + w * .2, y + h * .8, w * .6, h * .1),
       Paint()..color = const Color(0x770D100D),
     );
     canvas.drawRect(
@@ -550,65 +583,87 @@ class MazeGame extends FlameGame {
     );
   }
 
-  void _drawPlayer(Canvas canvas, double x, double y, double w, double h) {
+  void _drawPlayer(
+    Canvas canvas,
+    double x,
+    double y,
+    double w,
+    double h,
+    String equippedItem,
+  ) {
     final shadow = Paint()..color = const Color(0x990B100D);
-    final cloak = Paint()
-      ..shader = Gradient.linear(
-        Offset(x, y),
-        Offset(x + w, y + h),
-        const [Color(0xFF779158), Color(0xFF364E3C), Color(0xFF26372E)],
-        const [0, .52, 1],
-      );
+    final cloakColors = switch (equippedItem) {
+      'torch' => const [
+        Color(0xFFB36B36),
+        Color(0xFF76402E),
+        Color(0xFF4A2D25),
+      ],
+      'armor' => const [
+        Color(0xFF9A9B91),
+        Color(0xFF626962),
+        Color(0xFF414A46),
+      ],
+      'relic' => const [
+        Color(0xFFD8B768),
+        Color(0xFF9A753B),
+        Color(0xFF55452B),
+      ],
+      _ => const [Color(0xFF779158), Color(0xFF364E3C), Color(0xFF26372E)],
+    };
+    final headgearColor = switch (equippedItem) {
+      'torch' => const Color(0xFFE58A3F),
+      'armor' => const Color(0xFF9A9B91),
+      'relic' => const Color(0xFFF0D27A),
+      _ => const Color(0xFF566D48),
+    };
+    final cloak = Paint()..color = cloakColors.first;
     final leather = Paint()..color = const Color(0xFF8A5438);
     final skin = Paint()..color = const Color(0xFFE8B98B);
     final trim = Paint()..color = const Color(0xFFD8B768);
     final ink = Paint()..color = const Color(0xFF241E19);
-    canvas.drawOval(
-      Rect.fromLTWH(x + w * .12, y + h * .76, w * .76, h * .18),
+    canvas.drawRect(
+      Rect.fromLTWH(x + w * .12, y + h * .78, w * .76, h * .14),
       shadow,
     );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(x + w * .18, y + h * .42, w * .64, h * .44),
-        Radius.circular(w * .14),
-      ),
+    canvas.drawRect(
+      Rect.fromLTWH(x + w * .21, y + h * .45, w * .58, h * .38),
       cloak,
     );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(x + w * .62, y + h * .48, w * .2, h * .29),
-        Radius.circular(w * .05),
-      ),
+    canvas.drawRect(
+      Rect.fromLTWH(x + w * .62, y + h * .5, w * .19, h * .28),
       leather,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(x + w * .29, y + h * .2, w * .42, h * .38),
-        Radius.circular(w * .16),
-      ),
-      skin,
-    );
-    canvas.drawOval(
-      Rect.fromLTWH(x + w * .21, y + h * .09, w * .58, h * .28),
-      leather,
-    );
-    canvas.drawOval(
-      Rect.fromLTWH(x + w * .22, y + h * .08, w * .56, h * .2),
-      Paint()..color = const Color(0xFF566D48),
     );
     canvas.drawRect(
-      Rect.fromLTWH(x + w * .22, y + h * .25, w * .56, h * .055),
+      Rect.fromLTWH(x + w * .28, y + h * .2, w * .44, h * .35),
+      skin,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(x + w * .2, y + h * .12, w * .6, h * .18),
+      leather,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(x + w * .24, y + h * .08, w * .52, h * .15),
+      Paint()..color = headgearColor,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(x + w * .22, y + h * .25, w * .56, h * .06),
       trim,
     );
-    canvas.drawCircle(Offset(x + w * .43, y + h * .39), w * .025, ink);
-    canvas.drawCircle(Offset(x + w * .58, y + h * .39), w * .025, ink);
-    canvas.drawLine(
-      Offset(x + w * .43, y + h * .67),
-      Offset(x + w * .7, y + h * .67),
-      Paint()
-        ..color = const Color(0xFFE5D4A8)
-        ..strokeWidth = math.max(1.0, w * .035)
-        ..strokeCap = StrokeCap.round,
+    canvas.drawRect(
+      Rect.fromLTWH(x + w * .4, y + h * .38, w * .06, h * .06),
+      ink,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(x + w * .57, y + h * .38, w * .06, h * .06),
+      ink,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(x + w * .27, y + h * .79, w * .23, h * .1),
+      Paint()..color = const Color(0xFF211C18),
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(x + w * .52, y + h * .79, w * .24, h * .1),
+      Paint()..color = const Color(0xFF211C18),
     );
     final weaponStart = Offset(x + w * .53, y + h * .58);
     final weaponEnd = Offset(
@@ -621,7 +676,7 @@ class MazeGame extends FlameGame {
       Paint()
         ..color = const Color(0xFF392B20)
         ..strokeWidth = math.max(2.0, w * .1)
-        ..strokeCap = StrokeCap.round,
+        ..strokeCap = StrokeCap.square,
     );
     canvas.drawLine(
       Offset(
@@ -632,38 +687,65 @@ class MazeGame extends FlameGame {
       Paint()
         ..color = const Color(0xFFD4B16A)
         ..strokeWidth = math.max(1.0, w * .035)
-        ..strokeCap = StrokeCap.round,
+        ..strokeCap = StrokeCap.square,
     );
     if (_muzzleFlash > 0) {
-      canvas.drawCircle(
-        Offset(
-          weaponEnd.dx + _facingColumn * w * .06,
-          weaponEnd.dy + _facingRow * h * .06,
+      final flashCenter = Offset(
+        weaponEnd.dx + _facingColumn * w * .06,
+        weaponEnd.dy + _facingRow * h * .06,
+      );
+      canvas.drawRect(
+        Rect.fromCenter(
+          center: flashCenter,
+          width: math.min(w, h) * .2,
+          height: math.min(w, h) * .2,
         ),
-        math.min(w, h) * .1,
-        Paint()
-          ..color = const Color(0xFFFFD16C)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+        Paint()..color = const Color(0xFFFFD16C),
       );
     }
   }
 
   void _drawKey(Canvas canvas, double x, double y, double w, double h) {
     final gold = Paint()..color = const Color(0xFFF4C95D);
-    final center = Offset(x + w * .38, y + h * .38);
-    canvas.drawCircle(center, math.min(w, h) * .17, gold);
-    canvas.drawCircle(
-      center,
-      math.min(w, h) * .075,
-      Paint()..color = const Color(0xFF1A2A22),
-    );
+    final darkGold = Paint()..color = const Color(0xFF8F5A27);
+    final centerX = x + w * .37;
+    final centerY = y + h * .38;
+    final unit = math.min(w, h) * .075;
+    canvas
+      ..drawRect(
+        Rect.fromLTWH(
+          centerX - unit * 2,
+          centerY - unit * 2,
+          unit * 4,
+          unit * 4,
+        ),
+        darkGold,
+      )
+      ..drawRect(
+        Rect.fromLTWH(centerX - unit, centerY - unit, unit * 2, unit * 2),
+        Paint()..color = const Color(0xFF30271D),
+      )
+      ..drawRect(
+        Rect.fromLTWH(centerX - unit, centerY - unit * 2, unit * 2, unit),
+        gold,
+      )
+      ..drawRect(
+        Rect.fromLTWH(centerX - unit * 2, centerY - unit, unit, unit * 2),
+        gold,
+      )
+      ..drawRect(Rect.fromLTWH(centerX, centerY + unit, unit, unit), gold)
+      ..drawRect(
+        Rect.fromLTWH(centerX + unit, centerY + unit * 1.5, unit, unit),
+        gold,
+      );
     canvas.drawRect(
-      Rect.fromLTWH(x + w * .43, y + h * .34, w * .4, h * .1),
+      Rect.fromLTWH(centerX + unit * 2, centerY - unit * .5, w * .4, unit),
       gold,
     );
+    canvas.drawRect(Rect.fromLTWH(x + w * .7, centerY, w * .09, h * .18), gold);
     canvas.drawRect(
-      Rect.fromLTWH(x + w * .7, y + h * .4, w * .09, h * .2),
-      gold,
+      Rect.fromLTWH(x + w * .46, centerY + h * .09, w * .09, h * .06),
+      darkGold,
     );
   }
 
@@ -675,9 +757,9 @@ class MazeGame extends FlameGame {
     double h,
     bool unlocked,
   ) {
-    final frame = Paint()..color = const Color(0xFFB97743);
+    final frame = Paint()..color = const Color(0xFF8A5A36);
     final door = Paint()
-      ..color = unlocked ? const Color(0xFF79AA72) : const Color(0xFF754B37);
+      ..color = unlocked ? const Color(0xFF738047) : const Color(0xFF523523);
     canvas.drawRect(
       Rect.fromLTWH(x + w * .16, y + h * .12, w * .68, h * .78),
       frame,
@@ -689,6 +771,14 @@ class MazeGame extends FlameGame {
     canvas.drawRect(
       Rect.fromLTWH(x + w * .59, y + h * .54, w * .07, h * .08),
       Paint()..color = const Color(0xFFF4C95D),
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(x + w * .2, y + h * .14, w * .6, h * .06),
+      Paint()..color = const Color(0xFFC28B4D),
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(x + w * .32, y + h * .28, w * .05, h * .54),
+      Paint()..color = const Color(0xFF30251D),
     );
   }
 }
