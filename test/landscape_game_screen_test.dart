@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:juego/models/maze_level.dart';
+import 'package:juego/game/levels/level_manager.dart';
 import 'package:juego/screens/game_screen.dart';
 
 void main() {

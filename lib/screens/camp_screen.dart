@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../models/maze_level.dart';
-import '../services/progress_service.dart';
+import '../game/levels/level_manager.dart';
+import '../utils/progress_service.dart';
 import 'levels_screen.dart';
-import 'menu_screen.dart';
+import 'main_menu_screen.dart';
 import 'options_screen.dart';
 import 'records_screen.dart';
 import 'shop_screen.dart';
@@ -76,7 +76,7 @@ class _CampScreenState extends State<CampScreen> {
                               onPressed: () => Navigator.of(context)
                                   .pushReplacement(
                                     MaterialPageRoute<void>(
-                                      builder: (_) => const MenuScreen(),
+                                      builder: (_) => const MainMenuScreen(),
                                     ),
                                   ),
                               tooltip: 'Título principal',

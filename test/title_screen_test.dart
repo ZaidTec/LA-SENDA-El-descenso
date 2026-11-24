@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:juego/screens/menu_screen.dart';
+import 'package:juego/screens/main_menu_screen.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
@@ -21,7 +21,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const MaterialApp(home: MenuScreen()));
+    await tester.pumpWidget(const MaterialApp(home: MainMenuScreen()));
     await pumpCover(tester);
 
     final cover = tester.widget<Image>(
@@ -57,7 +57,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const MaterialApp(home: MenuScreen()));
+    await tester.pumpWidget(const MaterialApp(home: MainMenuScreen()));
     await pumpCover(tester);
     await tester.tap(find.byKey(const ValueKey('cover-play')));
     await pumpCover(tester);

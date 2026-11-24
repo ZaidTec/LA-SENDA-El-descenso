@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../services/progress_service.dart';
+import '../utils/progress_service.dart';
 import 'camp_screen.dart';
 
 class IntroScreen extends StatefulWidget {

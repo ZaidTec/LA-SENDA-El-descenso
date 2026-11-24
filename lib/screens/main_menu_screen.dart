@@ -4,19 +4,20 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../services/progress_service.dart';
+import '../utils/constants.dart';
+import '../utils/progress_service.dart';
 import 'camp_screen.dart';
 import 'intro_screen.dart';
 import 'options_screen.dart';
 
-class MenuScreen extends StatefulWidget {
-  const MenuScreen({super.key});
+class MainMenuScreen extends StatefulWidget {
+  const MainMenuScreen({super.key});
 
   @override
-  State<MenuScreen> createState() => _MenuScreenState();
+  State<MainMenuScreen> createState() => _MenuScreenState();
 }
 
-class _MenuScreenState extends State<MenuScreen>
+class _MenuScreenState extends State<MainMenuScreen>
     with SingleTickerProviderStateMixin {
   late Future<ProgressData> _progressFuture;
   late final AnimationController _coverAnimation;
@@ -149,7 +150,7 @@ class _MenuScreenState extends State<MenuScreen>
                       fit: StackFit.expand,
                       children: [
                         Image.asset(
-                          'assets/images/la_senda_cover.png',
+                          GameConstants.coverImage,
                           key: const ValueKey('cover-image'),
                           fit: BoxFit.fill,
                           filterQuality: FilterQuality.none,

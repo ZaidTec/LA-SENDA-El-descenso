@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/maze_level.dart';
+import '../game/levels/level_manager.dart';
 
 class ProgressData {
   const ProgressData({

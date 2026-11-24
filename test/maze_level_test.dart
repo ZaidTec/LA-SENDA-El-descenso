@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:juego/models/maze_level.dart';
+import 'package:juego/game/levels/level_manager.dart';
 
 void main() {
   test('all six mazes connect the start, key, and exit', () {

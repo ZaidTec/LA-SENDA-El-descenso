@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../services/progress_service.dart';
+import '../utils/progress_service.dart';
 import 'credits_screen.dart';
 import 'instructions_screen.dart';
 

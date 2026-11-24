@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
-import '../game/maze_game.dart';
-import '../models/maze_level.dart';
-import '../services/progress_service.dart';
-import '../widgets/direction_button.dart';
+import '../game/la_senda_game.dart';
+import '../game/levels/level_manager.dart';
+import '../game/overlays/hud.dart';
+import '../utils/progress_service.dart';
+import 'widgets/direction_button.dart';
 import 'camp_screen.dart';
 import 'result_screen.dart';
 
@@ -27,7 +28,7 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  late final MazeGame _game;
+  late final LaSendaGame _game;
   late MazeGameSnapshot _snapshot;
   bool _resultOpened = false;
 
@@ -42,7 +43,7 @@ class _GameScreenState extends State<GameScreen> {
       status: MazeGameStatus.playing,
       message: '',
     );
-    _game = MazeGame(
+    _game = LaSendaGame(
       level: widget.level,
       equippedItem: widget.equippedItem,
       onChanged: _handleGameChanged,
@@ -190,42 +191,12 @@ class _GameScreenState extends State<GameScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: _InfoCard(
-                        compact: true,
-                        icon: Icons.timer_outlined,
-                        label: 'TIEMPO',
-                        value: clock,
-                        valueColor: urgent
-                            ? const Color(0xFFFF8273)
-                            : const Color(0xFFF4EBD0),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: _InfoCard(
-                        compact: true,
-                        icon: _snapshot.hasKey ? Icons.key : Icons.key_off,
-                        label: 'LLAVE',
-                        value: _snapshot.hasKey ? 'Lista' : 'Pendiente',
-                        valueColor: _snapshot.hasKey
-                            ? const Color(0xFFFFB94A)
-                            : const Color(0xFFCBCBC1),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: _InfoCard(
-                        compact: true,
-                        icon: Icons.pest_control,
-                        label: 'ENEMIGOS',
-                        value: '${_snapshot.remainingEnemies}',
-                        valueColor: const Color(0xFFFF8273),
-                      ),
-                    ),
-                  ],
+                GameHud(
+                  clock: clock,
+                  hasKey: _snapshot.hasKey,
+                  remainingEnemies: _snapshot.remainingEnemies,
+                  urgent: urgent,
+                  compact: true,
                 ),
                 if (_snapshot.message.isNotEmpty) ...[
                   const SizedBox(height: 10),
@@ -264,39 +235,11 @@ class _GameScreenState extends State<GameScreen> {
         children: [
           _buildHeader(),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _InfoCard(
-                  icon: Icons.timer_outlined,
-                  label: 'TIEMPO',
-                  value: clock,
-                  valueColor: urgent
-                      ? const Color(0xFFFF8273)
-                      : const Color(0xFFF4EBD0),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _InfoCard(
-                  icon: _snapshot.hasKey ? Icons.key : Icons.key_off,
-                  label: 'LLAVE',
-                  value: _snapshot.hasKey ? 'Encontrada' : 'Pendiente',
-                  valueColor: _snapshot.hasKey
-                      ? const Color(0xFFFFB94A)
-                      : const Color(0xFFCBCBC1),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _InfoCard(
-                  icon: Icons.pest_control,
-                  label: 'ENEMIGOS',
-                  value: '${_snapshot.remainingEnemies}',
-                  valueColor: const Color(0xFFFF8273),
-                ),
-              ),
-            ],
+          GameHud(
+            clock: clock,
+            hasKey: _snapshot.hasKey,
+            remainingEnemies: _snapshot.remainingEnemies,
+            urgent: urgent,
           ),
           if (_snapshot.message.isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -529,67 +472,6 @@ class _JoystickControlState extends State<_JoystickControl> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.valueColor,
-    this.compact = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color valueColor;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? 7 : 14,
-        vertical: compact ? 7 : 10,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFF24211C),
-        borderRadius: BorderRadius.circular(3),
-        border: Border.all(color: const Color(0xFF59442E)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: valueColor, size: compact ? 18 : 22),
-          SizedBox(width: compact ? 5 : 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: compact ? 8 : 10,
-                    letterSpacing: 1.2,
-                    color: Colors.white60,
-                  ),
-                ),
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: valueColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

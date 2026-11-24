@@ -19,13 +19,14 @@ class DirectionButton extends StatefulWidget {
 }
 
 class _DirectionButtonState extends State<DirectionButton> {
+  static const _repeatInterval = Duration(milliseconds: 180);
   Timer? _repeatTimer;
 
   void _startMoving(TapDownDetails _) {
     _stopMoving();
     widget.onPressed();
     _repeatTimer = Timer.periodic(
-      const Duration(milliseconds: 180),
+      _repeatInterval,
       (_) => widget.onPressed(),
     );
   }

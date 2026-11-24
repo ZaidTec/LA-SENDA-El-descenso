@@ -1,12 +1,12 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:juego/game/maze_game.dart';
-import 'package:juego/models/maze_level.dart';
+import 'package:juego/game/la_senda_game.dart';
+import 'package:juego/game/levels/level_manager.dart';
 
 void main() {
   testWidgets('maze uses the laid out GameWidget canvas size', (tester) async {
-    final game = MazeGame(level: mazeLevels.first, onChanged: (_) {});
+    final game = LaSendaGame(level: mazeLevels.first, onChanged: (_) {});
 
     await tester.pumpWidget(
       MaterialApp(

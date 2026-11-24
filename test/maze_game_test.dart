@@ -1,8 +1,8 @@
 import 'dart:collection';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:juego/game/maze_game.dart';
-import 'package:juego/models/maze_level.dart';
+import 'package:juego/game/la_senda_game.dart';
+import 'package:juego/game/levels/level_manager.dart';
 
 void main() {
   test('the player collects the key and wins at the exit', () {
@@ -17,7 +17,7 @@ void main() {
       cellCount: 5,
       seed: 27,
     );
-    final game = MazeGame(level: level, onChanged: (_) {});
+    final game = LaSendaGame(level: level, onChanged: (_) {});
     final start = _find(level.rows, 'S');
     final key = _find(level.rows, 'K');
     final exit = _find(level.rows, 'E');
@@ -32,7 +32,7 @@ void main() {
 
   test('the player can shoot and eliminate an enemy', () {
     final level = mazeLevels.first;
-    final game = MazeGame(level: level, onChanged: (_) {});
+    final game = LaSendaGame(level: level, onChanged: (_) {});
     final start = _find(level.rows, 'S');
     final enemy = _find(level.rows, 'M');
     List<_Point>? approachPath;
@@ -81,7 +81,7 @@ void main() {
 
   test('contact with an enemy ends the level', () {
     final level = mazeLevels.first;
-    final game = MazeGame(level: level, onChanged: (_) {});
+    final game = LaSendaGame(level: level, onChanged: (_) {});
     final start = _find(level.rows, 'S');
     final enemy = _find(level.rows, 'M');
     List<_Point>? approachPath;
@@ -127,7 +127,7 @@ void main() {
   test('a wall blocks movement', () {
     final level = mazeLevels.first;
     var changeCount = 0;
-    final game = MazeGame(level: level, onChanged: (_) => changeCount++);
+    final game = LaSendaGame(level: level, onChanged: (_) => changeCount++);
     final start = _find(level.rows, 'S');
     const directions = <_Point>[
       _Point(-1, 0),
@@ -149,7 +149,7 @@ void main() {
 
   test('a wall blocks shots', () {
     final level = mazeLevels.first;
-    final game = MazeGame(level: level, onChanged: (_) {});
+    final game = LaSendaGame(level: level, onChanged: (_) {});
     final start = _find(level.rows, 'S');
     final wallDirection =
         const <_Point>[
@@ -172,7 +172,7 @@ void main() {
   });
 }
 
-void _followPath(MazeGame game, List<String> rows, List<_Point> path) {
+void _followPath(LaSendaGame game, List<String> rows, List<_Point> path) {
   for (var index = 1; index < path.length; index++) {
     final previous = path[index - 1];
     final current = path[index];

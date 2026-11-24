@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../models/maze_level.dart';
-import '../services/progress_service.dart';
+import '../game/levels/level_manager.dart';
+import '../utils/progress_service.dart';
 
 class RecordsScreen extends StatelessWidget {
   const RecordsScreen({super.key});

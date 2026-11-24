@@ -47,20 +47,27 @@ El APK se genera en `build/app/outputs/flutter-apk/app-release.apk`.
 
 ## Estructura
 
-- `lib/main.dart`: aplicación y tema.
-- `lib/models/maze_level.dart`: definición y generación de los tres laberintos.
-- `lib/game/maze_game.dart`: renderizado Flame, movimiento, disparos, enemigos,
-  llave, puerta y reloj.
-- `lib/screens/`: portada, introducción, campamento, opciones, tienda,
-  expediciones, instrucciones, juego, récords y resultados.
-- `assets/images/la_senda_cover.png`: imagen pixel art usada directamente en la portada.
-- `lib/screens/menu_screen.dart`: muestra la portada y ubica los controles
-  táctiles encima de Jugar, Opciones y Salir; también anima el fuego y las
-  chispas sin modificar la ilustración base.
-- `lib/services/progress_service.dart`: progreso, récords, recompensas,
+- `lib/main.dart`: punto de entrada, tema y rutas iniciales.
+- `lib/screens/`: interfaz Flutter, con `main_menu_screen.dart`,
+  `game_screen.dart`, `shop_screen.dart` y el resto de pantallas del flujo.
+- `lib/game/la_senda_game.dart`: clase Flame que coordina la partida, el
+  renderizado, movimiento, enemigos, disparos, llave, puerta y reloj.
+- `lib/game/components/`: estado y lógica del jugador, enemigos y proyectiles.
+- `lib/game/levels/level_manager.dart`: definición, catálogo y generación
+  procedural de los seis laberintos actuales.
+- `lib/game/overlays/`: máscara de iluminación y HUD.
+- `lib/utils/constants.dart`: constantes globales y colores.
+- `lib/utils/progress_service.dart`: progreso, récords, recompensas,
   preferencias e inventario.
-- `lib/widgets/direction_button.dart`: cruceta táctil para el movimiento.
-- `test/maze_level_test.dart`: comprueba que la llave y la salida sean alcanzables.
+- `lib/screens/widgets/direction_button.dart`: cruceta táctil.
+- `assets/images/`: imágenes del juego; incluye la portada pixel art.
+- `assets/tiles/`: espacio para recursos gráficos de tiles y mapas.
+- `test/`: pruebas del generador, el juego y las pantallas.
+
+Esta organización conserva las mecánicas actuales: los mapas siguen generándose
+en Dart (no se cargan mapas Tiled `.tmx`) y el ataque sigue siendo un disparo
+lineal. La migración a Tiled o a un boomerang que regrese sería un cambio de
+jugabilidad separado.
 
 ## Controles
 

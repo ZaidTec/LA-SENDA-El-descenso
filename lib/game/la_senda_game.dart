@@ -3,7 +3,12 @@ import 'dart:ui';
 
 import 'package:flame/game.dart';
 
-import '../models/maze_level.dart';
+import '../utils/constants.dart';
+import 'components/boomerang.dart';
+import 'components/enemy.dart';
+import 'components/player.dart';
+import 'levels/level_manager.dart';
+import 'overlays/darkness_overlay.dart';
 
 enum MazeGameStatus { playing, won, lost }
 
@@ -25,34 +30,8 @@ class MazeGameSnapshot {
   final String message;
 }
 
-class _Enemy {
-  _Enemy(this.row, this.column)
-    : fromRow = row.toDouble(),
-      fromColumn = column.toDouble();
-
-  int row;
-  int column;
-  double fromRow;
-  double fromColumn;
-  double moveProgress = 1;
-}
-
-class _Projectile {
-  _Projectile({
-    required this.row,
-    required this.column,
-    required this.rowDirection,
-    required this.columnDirection,
-  });
-
-  double row;
-  double column;
-  final int rowDirection;
-  final int columnDirection;
-}
-
-class MazeGame extends FlameGame {
-  MazeGame({
+class LaSendaGame extends FlameGame {
+  LaSendaGame({
     required this.level,
     required this.onChanged,
     this.equippedItem = 'explorer',
@@ -62,10 +41,7 @@ class MazeGame extends FlameGame {
       for (var column = 0; column < _map[row].length; column++) {
         switch (_map[row][column]) {
           case 'S':
-            _playerRow = row;
-            _playerColumn = column;
-            _playerFromRow = row.toDouble();
-            _playerFromColumn = column.toDouble();
+            _player = Player(row: row, column: column);
             _map[row][column] = '.';
           case 'K':
             _keyRow = row;
@@ -76,7 +52,7 @@ class MazeGame extends FlameGame {
             _exitColumn = column;
             _map[row][column] = '.';
           case 'M':
-            _enemies.add(_Enemy(row, column));
+            _enemies.add(Enemy(row, column));
             _map[row][column] = '.';
         }
       }
@@ -88,26 +64,20 @@ class MazeGame extends FlameGame {
   final void Function(MazeGameSnapshot snapshot) onChanged;
   final String equippedItem;
   final List<List<String>> _map;
-  final List<_Enemy> _enemies = [];
-  final List<_Projectile> _projectiles = [];
+  final List<Enemy> _enemies = [];
+  final List<Boomerang> _projectiles = [];
   final math.Random _random;
 
-  late int _playerRow;
-  late int _playerColumn;
+  late final Player _player;
   late int _keyRow;
   late int _keyColumn;
   late int _exitRow;
   late int _exitColumn;
-  late double _playerFromRow;
-  late double _playerFromColumn;
-  int _facingRow = 0;
-  int _facingColumn = 1;
   bool _hasKey = false;
   double _elapsed = 0;
   double _enemyMoveElapsed = 0;
   double _shotCooldown = 0;
   double _muzzleFlash = 0;
-  double _playerMoveProgress = 1;
   int _lastNotifiedRemaining = 0;
   String _message = '';
   MazeGameStatus _status = MazeGameStatus.playing;
@@ -118,7 +88,7 @@ class MazeGame extends FlameGame {
   int get elapsedSeconds => math.min(level.timeLimitSeconds, _elapsed.floor());
 
   @override
-  Color backgroundColor() => const Color(0xFF0C1512);
+  Color backgroundColor() => GameColors.cave;
 
   @override
   void update(double dt) {
@@ -128,7 +98,7 @@ class MazeGame extends FlameGame {
     }
     _shotCooldown = math.max(0.0, _shotCooldown - dt);
     _muzzleFlash = math.max(0.0, _muzzleFlash - dt);
-    _playerMoveProgress = math.min(1.0, _playerMoveProgress + dt / .11);
+    _player.update(dt);
     _updateProjectiles(dt);
     for (final enemy in _enemies) {
       enemy.moveProgress = math.min(1.0, enemy.moveProgress + dt / .22);
@@ -154,13 +124,10 @@ class MazeGame extends FlameGame {
     if (_status != MazeGameStatus.playing) {
       return;
     }
-    if (rowDelta != 0 || columnDelta != 0) {
-      _facingRow = rowDelta;
-      _facingColumn = columnDelta;
-    }
+    _player.face(rowDelta, columnDelta);
 
-    final nextRow = _playerRow + rowDelta;
-    final nextColumn = _playerColumn + columnDelta;
+    final nextRow = _player.row + rowDelta;
+    final nextColumn = _player.column + columnDelta;
     if (nextRow < 0 ||
         nextRow >= _map.length ||
         nextColumn < 0 ||
@@ -175,11 +142,7 @@ class MazeGame extends FlameGame {
       return;
     }
 
-    _playerFromRow = _visualPlayerRow;
-    _playerFromColumn = _visualPlayerColumn;
-    _playerMoveProgress = 0;
-    _playerRow = nextRow;
-    _playerColumn = nextColumn;
+    _player.moveTo(nextRow, nextColumn);
     _message = '';
 
     if (_enemies.any(
@@ -191,11 +154,11 @@ class MazeGame extends FlameGame {
       return;
     }
 
-    if (_playerRow == _keyRow && _playerColumn == _keyColumn) {
+    if (_player.row == _keyRow && _player.column == _keyColumn) {
       _hasKey = true;
       _message = '¡Llave encontrada! Ve a la puerta.';
     }
-    if (_playerRow == _exitRow && _playerColumn == _exitColumn) {
+    if (_player.row == _exitRow && _player.column == _exitColumn) {
       _status = MazeGameStatus.won;
     }
     _notify();
@@ -206,17 +169,16 @@ class MazeGame extends FlameGame {
       return;
     }
     if (rowDelta != null && columnDelta != null) {
-      _facingRow = rowDelta;
-      _facingColumn = columnDelta;
+      _player.face(rowDelta, columnDelta);
     }
     _shotCooldown = .2;
     _muzzleFlash = .08;
     _projectiles.add(
-      _Projectile(
-        row: _visualPlayerRow + _facingRow * .32,
-        column: _visualPlayerColumn + _facingColumn * .32,
-        rowDirection: _facingRow,
-        columnDirection: _facingColumn,
+      Boomerang(
+        row: _visualPlayerRow + _player.facingRow * .32,
+        column: _visualPlayerColumn + _player.facingColumn * .32,
+        rowDirection: _player.facingRow,
+        columnDirection: _player.facingColumn,
       ),
     );
     _message = '';
@@ -225,9 +187,7 @@ class MazeGame extends FlameGame {
   void _updateProjectiles(double dt) {
     for (var index = _projectiles.length - 1; index >= 0; index--) {
       final projectile = _projectiles[index];
-      projectile
-        ..row += projectile.rowDirection * dt * 13
-        ..column += projectile.columnDirection * dt * 13;
+      projectile.advance(dt);
 
       final row = projectile.row.floor();
       final column = projectile.column.floor();
@@ -257,13 +217,9 @@ class MazeGame extends FlameGame {
     }
   }
 
-  double get _visualPlayerRow =>
-      _playerFromRow +
-      (_playerRow - _playerFromRow) * _ease(_playerMoveProgress);
+  double get _visualPlayerRow => _player.visualRow;
 
-  double get _visualPlayerColumn =>
-      _playerFromColumn +
-      (_playerColumn - _playerFromColumn) * _ease(_playerMoveProgress);
+  double get _visualPlayerColumn => _player.visualColumn;
 
   double _ease(double progress) {
     final value = progress.clamp(0.0, 1.0);
@@ -312,7 +268,7 @@ class MazeGame extends FlameGame {
         ..row = destination.x
         ..column = destination.y
         ..moveProgress = 0;
-      if (enemy.row == _playerRow && enemy.column == _playerColumn) {
+      if (enemy.row == _player.row && enemy.column == _player.column) {
         _status = MazeGameStatus.lost;
         _message = '¡Una criatura te atrapó!';
         _notify();
@@ -327,7 +283,7 @@ class MazeGame extends FlameGame {
     final visited = <math.Point<int>>{start};
     for (var index = 0; index < queue.length; index++) {
       final (point, distance) = queue[index];
-      if (point.x == _playerRow && point.y == _playerColumn) {
+      if (point.x == _player.row && point.y == _player.column) {
         return distance;
       }
       for (final next in <math.Point<int>>[
@@ -387,16 +343,6 @@ class MazeGame extends FlameGame {
     final wallShadePaint = Paint()..color = const Color(0xFF171A1B);
     final wallEdgePaint = Paint()..color = const Color(0xFF4A4437);
     final floorSeamPaint = Paint()..color = const Color(0x303C3327);
-    final ambientGlow = Paint()
-      ..shader = Gradient.radial(
-        Offset(
-          (_visualPlayerColumn + .5) * tileWidth,
-          (_visualPlayerRow + .5) * tileHeight,
-        ),
-        math.max(renderSize.x, renderSize.y) * .68,
-        const [Color(0x48C47A35), Color(0x00110F0D)],
-      );
-
     for (var row = 0; row < _map.length; row++) {
       for (var column = 0; column < _map[row].length; column++) {
         final rect = Rect.fromLTWH(
@@ -477,11 +423,6 @@ class MazeGame extends FlameGame {
         }
       }
     }
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, renderSize.x, renderSize.y),
-      ambientGlow,
-    );
-
     if (!_hasKey) {
       _drawKey(
         canvas,
@@ -537,6 +478,17 @@ class MazeGame extends FlameGame {
       tileWidth,
       tileHeight,
       equippedItem,
+    );
+    DarknessOverlay.paint(
+      canvas,
+      size: Size(renderSize.x, renderSize.y),
+      lightCenter: Offset(
+        (_visualPlayerColumn + .5) * tileWidth,
+        (_visualPlayerRow + .5) * tileHeight,
+      ),
+      lightRadius:
+          math.min(tileWidth, tileHeight) *
+          GameConstants.torchLightRadiusInTiles,
     );
   }
 
@@ -667,8 +619,8 @@ class MazeGame extends FlameGame {
     );
     final weaponStart = Offset(x + w * .53, y + h * .58);
     final weaponEnd = Offset(
-      weaponStart.dx + _facingColumn * w * .34,
-      weaponStart.dy + _facingRow * h * .34,
+      weaponStart.dx + _player.facingColumn * w * .34,
+      weaponStart.dy + _player.facingRow * h * .34,
     );
     canvas.drawLine(
       weaponStart,
@@ -680,8 +632,8 @@ class MazeGame extends FlameGame {
     );
     canvas.drawLine(
       Offset(
-        weaponStart.dx + _facingColumn * w * .08,
-        weaponStart.dy + _facingRow * h * .08,
+        weaponStart.dx + _player.facingColumn * w * .08,
+        weaponStart.dy + _player.facingRow * h * .08,
       ),
       weaponEnd,
       Paint()
@@ -691,8 +643,8 @@ class MazeGame extends FlameGame {
     );
     if (_muzzleFlash > 0) {
       final flashCenter = Offset(
-        weaponEnd.dx + _facingColumn * w * .06,
-        weaponEnd.dy + _facingRow * h * .06,
+        weaponEnd.dx + _player.facingColumn * w * .06,
+        weaponEnd.dy + _player.facingRow * h * .06,
       );
       canvas.drawRect(
         Rect.fromCenter(

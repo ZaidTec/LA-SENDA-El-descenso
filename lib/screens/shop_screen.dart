@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../services/progress_service.dart';
+import '../utils/progress_service.dart';
 
 class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key});

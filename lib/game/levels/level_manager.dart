@@ -1,5 +1,6 @@
 import 'dart:math';
 
+/// Defines and generates the game's procedural expedition maps.
 class MazeLevel {
   MazeLevel({
     required this.number,

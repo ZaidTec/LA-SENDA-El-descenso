@@ -2,7 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'screens/menu_screen.dart';
+import 'screens/main_menu_screen.dart';
+import 'utils/constants.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,78 +21,73 @@ class LaberintoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const torchGold = Color(0xFFFFB94A);
-    const caveBlack = Color(0xFF0B0D0E);
-    const stoneSurface = Color(0xFF211F1B);
-    const wood = Color(0xFF593A27);
-    const parchment = Color(0xFFF0D7A0);
     return MaterialApp(
-      title: 'LA SENDA: El descenso',
+      title: GameConstants.appTitle,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: caveBlack,
+        scaffoldBackgroundColor: GameColors.cave,
         fontFamily: 'monospace',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: torchGold,
+          seedColor: GameColors.torch,
           brightness: Brightness.dark,
-          primary: torchGold,
-          secondary: const Color(0xFFC47735),
-          surface: stoneSurface,
-          onSurface: parchment,
-          error: const Color(0xFFD65A42),
+          primary: GameColors.torch,
+          secondary: GameColors.flame,
+          surface: GameColors.stone,
+          onSurface: GameColors.parchment,
+          error: GameColors.error,
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: caveBlack,
-          foregroundColor: parchment,
+          backgroundColor: GameColors.cave,
+          foregroundColor: GameColors.parchment,
           centerTitle: false,
           titleTextStyle: TextStyle(
             fontFamily: 'monospace',
-            color: torchGold,
+            color: GameColors.torch,
             fontSize: 18,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.2,
           ),
         ),
         cardTheme: CardThemeData(
-          color: stoneSurface,
+          color: GameColors.stone,
           shadowColor: Colors.black54,
           elevation: 3,
           margin: EdgeInsets.zero,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(3)),
-            side: BorderSide(color: Color(0xFF59442E), width: 1.5),
+            side: BorderSide(color: GameColors.stoneEdge, width: 1.5),
           ),
         ),
         dialogTheme: const DialogThemeData(
-          backgroundColor: stoneSurface,
+          backgroundColor: GameColors.stone,
           titleTextStyle: TextStyle(
             fontFamily: 'monospace',
-            color: torchGold,
+            color: GameColors.torch,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(3)),
-            side: BorderSide(color: Color(0xFF80603B), width: 2),
+            side: BorderSide(color: GameColors.woodLight, width: 2),
           ),
         ),
         snackBarTheme: const SnackBarThemeData(
-          backgroundColor: wood,
+          backgroundColor: GameColors.wood,
           contentTextStyle: TextStyle(
             fontFamily: 'monospace',
-            color: parchment,
+            color: GameColors.parchment,
           ),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(3)),
-            side: BorderSide(color: Color(0xFFB77C3D)),
+            side: BorderSide(color: GameColors.woodLight),
           ),
         ),
         sliderTheme: const SliderThemeData(
-          activeTrackColor: torchGold,
-          thumbColor: parchment,
+          activeTrackColor: GameColors.torch,
+          thumbColor: GameColors.parchment,
           inactiveTrackColor: Color(0xFF4A3A29),
           overlayColor: Color(0x33FFB94A),
         ),
@@ -100,15 +96,15 @@ class LaberintoApp extends StatelessWidget {
             shape: WidgetStateProperty.all(
               const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(3)),
-                side: BorderSide(color: Color(0xFF80603B)),
+                side: BorderSide(color: GameColors.woodLight),
               ),
             ),
           ),
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
-            backgroundColor: wood,
-            foregroundColor: parchment,
+            backgroundColor: GameColors.wood,
+            foregroundColor: GameColors.parchment,
             minimumSize: const Size.fromHeight(54),
             textStyle: const TextStyle(
               fontFamily: 'monospace',
@@ -118,14 +114,14 @@ class LaberintoApp extends StatelessWidget {
             ),
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(3)),
-              side: BorderSide(color: Color(0xFFB77C3D), width: 1.5),
+              side: BorderSide(color: GameColors.woodLight, width: 1.5),
             ),
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            foregroundColor: parchment,
-            side: const BorderSide(color: Color(0xFFB77C3D), width: 1.5),
+            foregroundColor: GameColors.parchment,
+            side: const BorderSide(color: GameColors.woodLight, width: 1.5),
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(3)),
             ),
@@ -136,7 +132,8 @@ class LaberintoApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const MenuScreen(),
+      initialRoute: '/',
+      routes: {'/': (_) => const MainMenuScreen()},
     );
   }
 }
